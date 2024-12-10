@@ -1,0 +1,22 @@
+[package]
+name = "plugin-lua-cygnixy"
+version = "0.1.0"
+authors = ["Cygnixy Team"]
+edition = "2021"
+license = "MIT"
+description = "Cygnixy Core Lua Plugin is a plugin for the Cygnixy framework"
+repository = "https://github.com/cygnixy/plugin-lua-cygnixy.git"
+readme = "README.md"
+keywords = ["cygnixy", "eve online", "bot", "framework", "plugin"]
+
+
+[dependencies]
+cygnixy-plugin-interface = { version = "0.1" }
+control-craft = { version = "0.1" }
+mlua = { version = "0.10", features = [
+    "luau",
+    "vendored",
+    "serialize",
+    "error-send",
+] }
+tracing = "0.1"
