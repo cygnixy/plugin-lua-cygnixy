@@ -2,7 +2,7 @@ use cygnixy_plugin_interface::{export_plugin, PluginLua};
 use mlua::{Function, Lua};
 use std::collections::HashMap;
 use std::error::Error;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, info, instrument, trace, warn};
 
 pub struct PluginLuaCygnixy;
 
@@ -33,10 +33,10 @@ impl PluginLua for PluginLuaCygnixy {
         Ok(())
     }
 
-    fn get_lua_functions(&self, lua: &Lua) -> HashMap<String, Function> {
+    fn get_lua_functions(&self, lua: &Lua, name: &str) -> HashMap<String, Function> {
         let mut functions = HashMap::new();
 
-        if let Err(e) = self.register_functions(lua, &mut functions) {
+        if let Err(e) = self.register_functions(lua, name, &mut functions) {
             error!("Failed to register Lua functions: {}", e);
         }
 
@@ -45,9 +45,11 @@ impl PluginLua for PluginLuaCygnixy {
 }
 
 impl PluginLuaCygnixy {
+    #[instrument(skip_all, name="lua", fields(uuid=?name))]
     fn register_functions(
         &self,
         lua: &Lua,
+        name: &str,
         functions: &mut HashMap<String, Function>,
     ) -> Result<(), Box<dyn Error>> {
         // Registering the "sleep" function
@@ -117,6 +119,24 @@ impl PluginLuaCygnixy {
             "info".to_string(),
             lua.create_function(|_, message: String| {
                 info!("{}", message);
+                Ok(())
+            })?,
+        );
+
+        // Registering the "warn" function
+        functions.insert(
+            "warn".to_string(),
+            lua.create_function(|_, message: String| {
+                warn!("{}", message);
+                Ok(())
+            })?,
+        );
+
+        // Registering the "trace" function
+        functions.insert(
+            "trace".to_string(),
+            lua.create_function(|_, message: String| {
+                trace!("{}", message);
                 Ok(())
             })?,
         );
