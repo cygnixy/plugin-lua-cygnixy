@@ -1,6 +1,6 @@
 [package]
 name = "plugin-lua-cygnixy"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Cygnixy Team"]
 edition = "2021"
 license = "MIT"

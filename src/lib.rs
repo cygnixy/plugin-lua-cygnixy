@@ -189,13 +189,13 @@ impl PluginLuaCygnixy {
             lua.create_function(
                 |_, (webhook_url, username, message): (String, String, String)| {
                     if webhook_url.trim().is_empty() {
-                        return Err(LuaError::external("webhook_url cannot be empty"));
+                        return Ok(());
                     }
                     if username.trim().is_empty() {
-                        return Err(LuaError::external("username cannot be empty"));
+                        return Ok(());
                     }
                     if message.trim().is_empty() {
-                        return Err(LuaError::external("message cannot be empty"));
+                        return Ok(());
                     }
 
                     // Block to execute async code synchronously
