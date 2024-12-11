@@ -4,12 +4,15 @@ Cygnixy Core Lua Plugin is a plugin for the **[Cygnixy framework](https://cygnix
 
 The plugin is automatically integrated into the framework, requiring no manual setup. Once registered, its functions are immediately available for use in Lua.
 
+**[Cygnixy framework](https://cygnixy.com)** is a platform for creating bots in EVE Online.
+
 ## Features
 
 * **System Interaction**:
   + Control the mouse position and simulate mouse clicks.
   + Perform drag-and-drop operations.
   + Simulate key presses.
+  + Send messages to Discord channels via webhooks.
 
 * **Logging**:
   + Log informational, debug, and error messages to the console using `tracing`.
@@ -121,6 +124,20 @@ Logs an error message.
 
 ```lua
 cygnixy.error("This is an error message")
+```
+
+#### `discord_send(webhook_url: String, username: String, message: String)`
+
+Sends a message to a Discord channel via a webhook.
+
+**Example:**
+
+```lua
+cygnixy.discord_send(
+  "https://discord.com/api/webhooks/your-webhook-id/your-webhook-token",
+  "BotName",
+  "Hello, Discord!"
+)
 ```
 
 ---
