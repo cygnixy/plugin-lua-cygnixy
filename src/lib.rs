@@ -1,7 +1,10 @@
 use cygnixy_plugin_interface::{export_plugin, PluginLua};
+use mlua::prelude::LuaError;
 use mlua::{Function, Lua};
+use serenity::all::{ExecuteWebhook, Http, Webhook};
 use std::collections::HashMap;
 use std::error::Error;
+use tokio::runtime::Builder;
 use tracing::{debug, error, info, trace, warn};
 
 pub struct PluginLuaCygnixy;
@@ -178,6 +181,47 @@ impl PluginLuaCygnixy {
                     Ok(())
                 }
             })?,
+        );
+
+        // Registering the "discord_send" function
+        functions.insert(
+            "discord_send".to_string(),
+            lua.create_function(
+                |_, (webhook_url, username, message): (String, String, String)| {
+                    if webhook_url.trim().is_empty() {
+                        return Err(LuaError::external("webhook_url cannot be empty"));
+                    }
+                    if username.trim().is_empty() {
+                        return Err(LuaError::external("username cannot be empty"));
+                    }
+                    if message.trim().is_empty() {
+                        return Err(LuaError::external("message cannot be empty"));
+                    }
+
+                    // Block to execute async code synchronously
+                    let runtime = Builder::new_current_thread().enable_all().build().unwrap();
+
+                    let result = runtime.block_on(async {
+                        let http = Http::new("");
+                        let webhook = Webhook::from_url(&http, &webhook_url)
+                            .await
+                            .map_err(|e| format!("Failed to load webhook: {}", e))?;
+
+                        let builder = ExecuteWebhook::new().content(&message).username(&username);
+
+                        webhook
+                            .execute(&http, false, builder)
+                            .await
+                            .map_err(|e| format!("Failed to execute webhook: {}", e))
+                    });
+
+                    // Handle result
+                    match result {
+                        Ok(_) => Ok(()),
+                        Err(err) => Err(LuaError::external(err)),
+                    }
+                },
+            )?,
         );
 
         Ok(())
