@@ -2,7 +2,7 @@ use cygnixy_plugin_interface::{export_plugin, PluginLua};
 use mlua::{Function, Lua};
 use std::collections::HashMap;
 use std::error::Error;
-use tracing::{debug, error, info, instrument, trace, warn};
+use tracing::{debug, error, info, trace, warn};
 
 pub struct PluginLuaCygnixy;
 
@@ -45,13 +45,14 @@ impl PluginLua for PluginLuaCygnixy {
 }
 
 impl PluginLuaCygnixy {
-    #[instrument(skip_all, name="lua", fields(uuid=?name))]
     fn register_functions(
         &self,
         lua: &Lua,
         name: &str,
         functions: &mut HashMap<String, Function>,
     ) -> Result<(), Box<dyn Error>> {
+        let span = tracing::span!(tracing::Level::DEBUG, "lua", uuid = ?name);
+
         // Registering the "sleep" function
         functions.insert(
             "sleep".to_string(),
@@ -117,45 +118,65 @@ impl PluginLuaCygnixy {
         // Registering the "info" function
         functions.insert(
             "info".to_string(),
-            lua.create_function(|_, message: String| {
-                info!("{}", message);
-                Ok(())
+            lua.create_function({
+                let span = span.clone();
+                move |_, message: String| {
+                    let _enter = span.enter();
+                    info!("{}", message);
+                    Ok(())
+                }
             })?,
         );
 
         // Registering the "warn" function
         functions.insert(
             "warn".to_string(),
-            lua.create_function(|_, message: String| {
-                warn!("{}", message);
-                Ok(())
+            lua.create_function({
+                let span = span.clone();
+                move |_, message: String| {
+                    let _enter = span.enter();
+                    warn!("{}", message);
+                    Ok(())
+                }
             })?,
         );
 
         // Registering the "trace" function
         functions.insert(
             "trace".to_string(),
-            lua.create_function(|_, message: String| {
-                trace!("{}", message);
-                Ok(())
+            lua.create_function({
+                let span = span.clone();
+                move |_, message: String| {
+                    let _enter = span.enter();
+                    trace!("{}", message);
+                    Ok(())
+                }
             })?,
         );
 
         // Registering the "debug" function
         functions.insert(
             "debug".to_string(),
-            lua.create_function(|_, message: String| {
-                debug!("{}", message);
-                Ok(())
+            lua.create_function({
+                let span = span.clone();
+                move |_, message: String| {
+                    let _enter = span.enter();
+                    debug!("{}", message);
+                    Ok(())
+                }
             })?,
         );
 
         // Registering the "error" function
         functions.insert(
             "error".to_string(),
-            lua.create_function(|_, message: String| {
-                error!("{}", message);
-                Ok(())
+            lua.create_function({
+                let span = span.clone();
+                move |_, message: String| {
+                    let _enter = span.enter();
+                    error!("{}", message);
+                    Ok(())
+                }
             })?,
         );
 
